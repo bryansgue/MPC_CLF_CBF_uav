@@ -9,11 +9,15 @@ import time
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 from sensor_msgs.msg import Joy
-
+import math
 
 from Functions_SimpleModel import odometry_call_back, get_odometry_simple, send_velocity_control
 from Functions_DinamicControl import calc_G, calc_C, calc_M, calc_J, limitar_angulo
 from fancy_plots import plot_pose, plot_error, plot_time
+
+
+# Tiempo de inicio cuando se detecta la condición
+
 
 
 def main(vel_pub, vel_msg ):
@@ -65,10 +69,10 @@ def main(vel_pub, vel_msg ):
     
     # Reference Signal of the system
     xref = np.zeros((12, t.shape[0]), dtype = np.double)
-    xref[0,:] = 0
+    xref[0,:] = 5
     xref[1,:] = 0
-    xref[2,:] = 5
-    xref[3,:] = 0
+    xref[2,:] = 6.5
+    xref[3,:] = 90* (math.pi / 180)
     xref[4,:] = 0
     xref[5,:] = 0
     xref[6,:] = 0
@@ -85,6 +89,8 @@ def main(vel_pub, vel_msg ):
         # Loop_rate.sleep()
         rate.sleep() 
         print("Init System Position")
+
+    start_time = None  
     
     for k in range(samples-1):
         #INICIO DEL TIEMPO DE BUCLE
@@ -124,15 +130,28 @@ def main(vel_pub, vel_msg ):
         toc = time.time() - tic 
 
         #Condicion para romper:
-        umbral = 0.015
+        umbral = 0.03
 
         # Calcula la norma 2 de toda la columna
         norma_2_columna = np.linalg.norm(he[:, k])  # Calcula la norma 2 de la columna k
 
+ 
+
         if norma_2_columna < umbral:
-            send_velocity_control([0, 0, 0, 0], vel_pub, vel_msg )
-            print("Pose Init:", [round(element, 2) for element in x[:, k+1]])
-            break
+            if start_time is None:
+                start_time = time.time()  # Inicia el temporizador solo la primera vez
+            
+            elapsed_time_s = time.time() - start_time  # Tiempo en segundos
+            print(f"Condición activa por {elapsed_time_s:.2f} s", end='\r')  # Mostrar en segundos con 2 decimales
+
+            # Si la condición se mantiene por al menos 0.5 segundos, se detiene
+            if elapsed_time_s >= 0.5:
+                send_velocity_control([0, 0, 0, 0], vel_pub, vel_msg)
+                print("\nPose Init:", [round(element, 2) for element in x[:, k+1]])
+                break
+        else:
+            start_time = None  # Reiniciar el temporizador si la condición deja de cumplirse
+
                 
         print("Error:", " ".join("{:.2f}".format(value) for value in np.round(he[:, k], decimals=2)), end='\r')
 

@@ -25,6 +25,7 @@ extern "C" {
 
 /* Add prefix to internal symbols */
 #define casadi_c0 CASADI_PREFIX(c0)
+#define casadi_c1 CASADI_PREFIX(c1)
 #define casadi_clear CASADI_PREFIX(clear)
 #define casadi_copy CASADI_PREFIX(copy)
 #define casadi_dot CASADI_PREFIX(dot)
@@ -82,6 +83,7 @@ static const casadi_int casadi_s3[29] = {25, 1, 0, 25, 0, 1, 2, 3, 4, 5, 6, 7, 8
 static const casadi_int casadi_s4[5] = {1, 1, 0, 1, 0};
 
 static const casadi_real casadi_c0[9] = {1., 0., 0., 0., 1., 0., 0., 0., 1.};
+static const casadi_real casadi_c1[9] = {3., 0., 0., 0., 3., 0., 0., 0., 3.};
 
 /* Drone_ode_cost_ext_cost_e_fun:(i0[11],i1[],i2[],i3[25])->(o0) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem) {
@@ -210,10 +212,10 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   /* #43: @34 = @2' */
   casadi_copy(w2, 3, w34);
   /* #44: @3 = 
-  [[1, 0, 0], 
-   [0, 1, 0], 
-   [0, 0, 1]] */
-  casadi_copy(casadi_c0, 9, w3);
+  [[3, 0, 0], 
+   [0, 3, 0], 
+   [0, 0, 3]] */
+  casadi_copy(casadi_c1, 9, w3);
   /* #45: @1 = mac(@34,@3,@1) */
   for (i=0, rr=w1; i<3; ++i) for (j=0; j<1; ++j, ++rr) for (k=0, ss=w34+j, tt=w3+i*3; k<3; ++k) *rr += ss[k*1]**tt++;
   /* #46: @0 = mac(@1,@2,@0) */
@@ -229,10 +231,10 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   /* #51: @2 = @32' */
   casadi_copy(w32, 3, w2);
   /* #52: @3 = 
-  [[1, 0, 0], 
-   [0, 1, 0], 
-   [0, 0, 1]] */
-  casadi_copy(casadi_c0, 9, w3);
+  [[3, 0, 0], 
+   [0, 3, 0], 
+   [0, 0, 3]] */
+  casadi_copy(casadi_c1, 9, w3);
   /* #53: @1 = mac(@2,@3,@1) */
   for (i=0, rr=w1; i<3; ++i) for (j=0; j<1; ++j, ++rr) for (k=0, ss=w2+j, tt=w3+i*3; k<3; ++k) *rr += ss[k*1]**tt++;
   /* #54: @4 = mac(@1,@32,@4) */
@@ -380,8 +382,8 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   for (i=0, rr=(&w4); i<1; ++i) for (j=0; j<1; ++j, ++rr) for (k=0, ss=w1+j, tt=w2+i*3; k<3; ++k) *rr += ss[k*1]**tt++;
   /* #120: @0 = (@0+@4) */
   w0 += w4;
-  /* #121: @4 = 0.1 */
-  w4 = 1.0000000000000001e-01;
+  /* #121: @4 = 0.0001 */
+  w4 = 1.0000000000000000e-04;
   /* #122: @1 = zeros(3x1) */
   casadi_clear(w1, 3);
   /* #123: @3 = 

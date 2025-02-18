@@ -33,26 +33,26 @@ from scipy.io import savemat
 from fancy_plots import plot_pose, plot_error, plot_time
 
 from Functions_SimpleModel import calc_M, calc_C, calc_G, QuatToRot, QuatToRot_nunpy, log_cuaternion_casadi
-from Functions_SimpleModel import f_d, odometry_call_back_1, odometry_call_back_2, get_odometry_simple_quat_1, get_odometry_simple_quat_2, send_velocity_control, pub_odometry_sim_quat, euler_to_quaternion, quaternion_error, publish_matrix 
-#import P_UAV_simple
+from Functions_SimpleModel import f_d, odometry_call_back, get_odometry_simple_quat, send_velocity_control, pub_odometry_sim_quat, euler_to_quaternion, quaternion_error, publish_matrix 
+import P_UAV_simple
 
 # Global variables Odometry Drone
-x_real_1 = 1
-y_real_1 = 1
-z_real_1 = 5
-vx_real_1 = 0.0
-vy_real_1 = 0.0
-vz_real_1 = 0.0
-qw_real_1 = 1
-qx_real_1 = 0
-qy_real_1 = 0.0
-qz_real_1 = 0
-wx_real_1 = 0.0
-wy_real_1 = 0.0
-wz_real_1 = 0.0
+x_real = 1
+y_real = 1
+z_real = 5
+vx_real = 0.0
+vy_real = 0.0
+vz_real = 0.0
+qw_real = 1
+qx_real = 0
+qy_real = 0.0
+qz_real = 0
+wx_real = 0.0
+wy_real = 0.0
+wz_real = 0.0
 
 # Definir el valor global
-value = 10
+value = 5
 valueB = 7 # Buencomportameinto con 5
 
 uav_r = 0.15
@@ -209,7 +209,9 @@ def f_system_simple_model_quat():
 
     return model, f_system, f_x, g_x
 
-def create_ocp_solver_description(x0, N_horizon, t_horizon, zp_max, zp_min, phi_max, phi_min, theta_max, theta_min, psi_max, psi_min) -> AcadosOcp:
+def create_ocp_solver_description(x0, N_horizon, t_horizon) -> AcadosOcp:
+
+
     # create ocp object to formulate the OCP
     ocp = AcadosOcp()
 
@@ -274,10 +276,10 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon, zp_max, zp_min, phi_
     #Ganancias
     # set cost
     Q_q = 1* np.diag([1, 1, 1])  # [x,th,dx,dth]
-    Q_el = 1 * np.eye(3)  
-    Q_ec = 1* np.eye(3) 
-    U_mat = 0.01 * np.diag([ 1,1,1,1])
-    Q_vels = 0.1
+    Q_el = 3 * np.eye(3)  
+    Q_ec = 3 * np.eye(3) 
+    U_mat = 2 * np.diag([ 1,1,2,1])
+    Q_vels = 0.0001
 
 
     #COSTO EXTERNO
@@ -348,7 +350,7 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon, zp_max, zp_min, phi_
     h_p_movil = Lf_h_movil + Lg_h_movil @ model.u
     h_pp_movil = Lf2_h_movil + Lg_L_f_h_movil @ model.u
 
-    # set constraints
+        # set constraints
     ocp.constraints.constr_type = 'BGH'
 
     # Funciones de barrera de segundo orden
@@ -358,25 +360,27 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon, zp_max, zp_min, phi_
     nb_1_movil = h_movil
     nb_2_movil = vertcat(h_movil, Lf_h_movil) 
 
-    K_alpha = MX([40, 12]).T ## 20 8
+
+    K_alpha = MX([20, 8]).T ## 20 8
     K_alpha_movil = MX([20, 15]).T ## 20 8
 
     #constraints = vertcat(h_p + 5*nb_1)
     CBF_static = h_pp +  K_alpha @ nb_2
     CBF_movil = h_pp_movil +  K_alpha_movil @ nb_2_movil
 
-    constraints = vertcat(CBF_static, CBF_movil)
+    constraints = vertcat(CBF_static, CBF_movil, V_p + 0.9*V)
+    #constraints = vertcat(CBF_static, CBF_movil  , V_p + 0.9*V, vel_progres)
     #constraints = vertcat(model.x[0] )
 
     # Asigna las restricciones al modelo del OCP
     N_constraints = constraints.size1()
 
     ocp.model.con_h_expr = constraints
-    ocp.constraints.lh = np.array([0,0])  # Límite inferior 
-    ocp.constraints.uh = np.array([1e9,1e9])  # Límite superior
+    ocp.constraints.lh = np.array([0,   0,  -1e9 ])  # Límite inferior 
+    ocp.constraints.uh = np.array([1e9, 1e9,  0  ])  # Límite superior
 
     # Configuración de las restricciones suaves
-    cost_weights =  np.array([0.1,0.1])
+    cost_weights =  np.array([0.1,0.1 ,10])
     ocp.cost.zu = 1*cost_weights 
     ocp.cost.zl = 1*cost_weights 
     ocp.cost.Zl = 1 * cost_weights 
@@ -385,7 +389,14 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon, zp_max, zp_min, phi_
     # Índices para las restricciones suaves (necesario si se usan)
     ocp.constraints.idxsh = np.arange(N_constraints)  # Índices de las restricciones suaves
 
+    
+
     ocp.constraints.x0 = x0
+
+
+    ocp.constraints.lbu = np.array([-2])
+    ocp.constraints.ubu = np.array([2])
+    ocp.constraints.idxbu = np.array([2]) #un
 
     # set options
     ocp.solver_options.qp_solver = "FULL_CONDENSING_HPIPM"  # FULL_CONDENSING_QPOASES
@@ -537,6 +548,44 @@ def calculate_positions_and_arc_length(xd, yd, zd, xd_p, yd_p, zd_p, t_range, t_
 
     return arc_lengths, positions, position_by_arc_length
 
+def manage_ocp_solver(model, ocp):
+    """
+    Maneja la creación o uso del solver OCP.
+
+    Args:
+        model: El modelo utilizado para definir el solver.
+        ocp: La descripción del OCP a gestionar.
+
+    Returns:
+        acados_ocp_solver: La instancia del solver creado o cargado.
+    """
+    # Definir el nombre del archivo JSON
+    solver_json = 'acados_ocp_' + model.name + '.json'
+
+    # Comprobar si el archivo JSON del solver ya existe
+    if os.path.exists(solver_json):
+        # Preguntar al usuario qué desea hacer
+        respuesta = input(f"El solver {solver_json} ya existe. ¿Usar anterior (a) o generar nuevo (n)? [a/n]: ").strip().upper()
+        
+        if respuesta == 'A':
+            print(f"Usando el solver existente: {solver_json}")
+            # Crear el solver directamente desde el archivo existente
+            return AcadosOcpSolver.create_cython_solver(solver_json)
+        elif respuesta == 'N':
+            print(f"Regenerando y reconstruyendo el solver: {solver_json}")
+            # Generar y construir el solver
+            AcadosOcpSolver.generate(ocp, json_file=solver_json)
+            AcadosOcpSolver.build(ocp.code_export_directory, with_cython=True)
+            return AcadosOcpSolver.create_cython_solver(solver_json)
+        else:
+            raise ValueError("Opción no válida. No se realizó ninguna acción.")
+    else:
+        print(f"El solver {solver_json} no existe. Generando y construyendo...")
+        # Generar y construir el solver
+        AcadosOcpSolver.generate(ocp, json_file=solver_json)
+        AcadosOcpSolver.build(ocp.code_export_directory, with_cython=True)
+        return AcadosOcpSolver.create_cython_solver(solver_json)
+
 def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     # Initial Values System
     # Simulation Time
@@ -555,6 +604,10 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     # Time simulation
     t = np.arange(0, t_final + t_s, t_s)
 
+    # Simulation System
+    ros_rate = 30  # Tasa de ROS en Hz
+    rate = rospy.Rate(ros_rate)  # Crear un objeto de la clase rospy.Rate
+
     # Sample time vector
     delta_t = np.zeros((1, t.shape[0] - N_prediction), dtype=np.double)
     t_sample = t_s*np.ones((1, t.shape[0] - N_prediction), dtype=np.double)
@@ -572,8 +625,21 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     x = np.zeros((11, t.shape[0]+1-N_prediction), dtype = np.double)
 
     # Read Real data
-    x[:, 0] = get_odometry_simple_quat_1()
-    x[:, 0] = [1,1,5,1,0,0,0.5,0,0,0,0]
+    P_UAV_simple.main(vel_pub, vel_msg )
+
+    
+
+    # Cuenta regresiva de 5 segundos
+    print("Inicializando sistema...")
+    for i in range(3, 0, -1):
+        print(f"Leyendo odometría... Inicio en {i} segundos")
+        # Realizar exactamente 5 lecturas en 1 segundo
+        for _ in range(3):
+            x[:, 0] = get_odometry_simple_quat()
+            time.sleep(0.2)  # Espera 0.2s entre cada lectura (5 lecturas en 1 segundo)
+    print("¡Sistema listo!")
+    
+    #x[:, 0] = [1,1,5,1,0,0,0.5,0,0,0,0]
    
     # Obtener las funciones de trayectoria y sus derivadas
     xd, yd, zd, xd_p, yd_p, zd_p = trayectoria(t)
@@ -646,14 +712,11 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     # Create Optimal problem
     model, f, f_x, g_x = f_system_simple_model_quat()
 
-    ocp = create_ocp_solver_description(x[:,0], N_prediction, t_prediction, zp_ref_max, zp_ref_min, phi_max, phi_min, theta_max, theta_min, psi_max, psi_min)
+    #Ganancias
+    ocp = create_ocp_solver_description(x[:,0], N_prediction, t_prediction)
     #acados_ocp_solver = AcadosOcpSolver(ocp, json_file="acados_ocp_" + ocp.model.name + ".json", build= True, generate= True)
 
-    solver_json = 'acados_ocp_' + model.name + '.json'
-    AcadosOcpSolver.generate(ocp, json_file=solver_json)
-    AcadosOcpSolver.build(ocp.code_export_directory, with_cython=True)
-    acados_ocp_solver = AcadosOcpSolver.create_cython_solver(solver_json)
-    #acados_ocp_solver = AcadosOcpSolverCython(ocp.model.name, ocp.solver_options.nlp_solver_type, ocp.dims.N)
+    acados_ocp_solver = manage_ocp_solver(model, ocp)
 
     nx = ocp.model.x.size()[0]
     nu = ocp.model.u.size()[0]
@@ -670,9 +733,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     # Errors of the system
     Error = np.zeros((3, t.shape[0]-N_prediction), dtype = np.double)
 
-    # Simulation System
-    ros_rate = 30  # Tasa de ROS en Hz
-    rate = rospy.Rate(ros_rate)  # Crear un objeto de la clase rospy.Rate
+    
 
 
     constraint_expr = ocp.model.con_h_expr
@@ -730,8 +791,8 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         h_CBF_2[:, k] = np.linalg.norm(x[:3, k] - obst_movil) - (uav_r + obsmovil_r + margen)
         print(h_CBF_1[:, k])
 
-        #constraint_value = constraint_func(x[:, k],u_control[:, k],  np.hstack([xref[:,k], values])   )
-        #CLF[:,k] = (constraint_value[2])
+        constraint_value = constraint_func(x[:, k],u_control[:, k],  np.hstack([xref[:,k],dp_ds[:,k], values])   )
+        CLF[:,k] = (constraint_value[2])
 
 
         # SET REFERENCES       
@@ -769,10 +830,10 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         send_velocity_control(u_control[:, k], vel_pub, vel_msg)
 
         # System Evolution
-        opcion = "Sim"  # Valor que quieres evaluar
+        opcion = "Real"  # Valor que quieres evaluar
 
         if opcion == "Real":
-            x[:, k+1] = get_odometry_simple_quat_1()
+            x[:, k+1] = get_odometry_simple_quat()
         elif opcion == "Sim":
             x[:, k+1] = f_d(x[:, k], u_control[:, k], t_s, f)
             pub_odometry_sim_quat(x[:, k+1], odom_sim_pub_1, odom_sim_msg_1)
@@ -787,7 +848,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         rate.sleep() 
         toc = time.time() - tic 
 
-        e_contorno[:,k], e_arrastre[:,k], e_total[:,k], vel_progres[:,k] = calculate_errors_norm(xref[0:3,k], xref[3:6,k], x[:,k])
+        e_contorno[:,k], e_arrastre[:,k], e_total[:,k], vel_progres[:,k] = calculate_errors_norm(xref[0:3,k], dp_ds[0:3,k], x[:,k])
 
         
         vel_progress_ref[:, k] =  0
@@ -847,8 +908,8 @@ if __name__ == '__main__':
         rospy.init_node("Acados_controller",disable_signals=True, anonymous=True)
 
         # SUCRIBER
-        Matrice_1 = rospy.Subscriber("/dji_sdk/odometry", Odometry, odometry_call_back_1)
-        Matrice_2 = rospy.Subscriber("/M2/dji_sdk/odometry", Odometry, odometry_call_back_2)
+        Matrice_1 = rospy.Subscriber("/dji_sdk/odometry", Odometry, odometry_call_back)
+        #Matrice_2 = rospy.Subscriber("/M2/dji_sdk/odometry", Odometry, odometry_call_back_2)
         
         # PUBLISHER
         velocity_message = TwistStamped()

@@ -32,7 +32,7 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon, zp_max, zp_min, phi_
     # create ocp object to formulate the OCP
     ocp = AcadosOcp()
 
-    model, f_system = f_system_simple_model()
+    model, f_system, f_x, g_x = f_system_simple_model()
     ocp.model = model
     nx = model.x.size()[0]
     nu = model.u.size()[0]
@@ -185,7 +185,7 @@ def main(vel_pub, vel_msg, odom_sim_pub, odom_sim_msg):
         print("Init System")
 
     # Create Optimal problem
-    model, f = f_system_simple_model()
+    model, f, f_x, g_x = f_system_simple_model()
 
     ocp = create_ocp_solver_description(x[:,0], N_prediction, t_prediction, zp_ref_max, zp_ref_min, phi_max, phi_min, theta_max, theta_min, psi_max, psi_min)
     #acados_ocp_solver = AcadosOcpSolver(ocp, json_file="acados_ocp_" + ocp.model.name + ".json", build= True, generate= True)

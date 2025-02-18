@@ -43,10 +43,10 @@
 #define DRONE_ODE_NP_GLOBAL     0
 #define DRONE_ODE_NBX    0
 #define DRONE_ODE_NBX0   11
-#define DRONE_ODE_NBU    0
+#define DRONE_ODE_NBU    1
 #define DRONE_ODE_NSBX   0
 #define DRONE_ODE_NSBU   0
-#define DRONE_ODE_NSH    2
+#define DRONE_ODE_NSH    3
 #define DRONE_ODE_NSH0   0
 #define DRONE_ODE_NSG    0
 #define DRONE_ODE_NSPHI  0
@@ -55,7 +55,7 @@
 #define DRONE_ODE_NSPHIN 0
 #define DRONE_ODE_NSPHI0 0
 #define DRONE_ODE_NSBXN  0
-#define DRONE_ODE_NS     2
+#define DRONE_ODE_NS     3
 #define DRONE_ODE_NS0    0
 #define DRONE_ODE_NSN    0
 #define DRONE_ODE_NG     0
@@ -65,7 +65,7 @@
 #define DRONE_ODE_NY     0
 #define DRONE_ODE_NYN    0
 #define DRONE_ODE_N      32
-#define DRONE_ODE_NH     2
+#define DRONE_ODE_NH     3
 #define DRONE_ODE_NHN    0
 #define DRONE_ODE_NH0    0
 #define DRONE_ODE_NPHI0  0

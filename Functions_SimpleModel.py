@@ -393,6 +393,32 @@ def get_odometry_simple():
 
     return x_state
 
+
+def get_odometry_simple_quat():
+
+    quaternion = [qx_real, qy_real, qz_real, qw_real ] # cuaternión debe estar en la convención "xyzw",
+    r_quat = R.from_quat(quaternion)
+    euler =  r_quat.as_euler('zyx', degrees = False)
+    psi = euler[0]
+
+    J = np.zeros((3, 3))
+    J[0, 0] = np.cos(psi)
+    J[0, 1] = -np.sin(psi)
+    J[1, 0] = np.sin(psi)
+    J[1, 1] = np.cos(psi)
+    J[2, 2] = 1
+
+    J_inv = np.linalg.inv(J)
+    v = np.dot(J_inv, [vx_real, vy_real, vz_real])
+ 
+    ul_real = v[0]
+    um_real = v[1]
+    un_real = v[2]
+
+    x_state = [x_real,y_real,z_real,qw_real,qx_real,qy_real,qz_real,ul_real,um_real,un_real, wz_real]
+
+    return x_state
+
 def get_odometry_simple_quat_1():
 
     quaternion = [qx_real_1, qy_real_1, qz_real_1, qw_real_1 ] # cuaternión debe estar en la convención "xyzw",

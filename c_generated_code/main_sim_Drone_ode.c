@@ -76,17 +76,17 @@ int main()
     x_current[10] = 0.0;
 
   
-    x_current[0] = -0.006002924591752118;
-    x_current[1] = -0.07261979539763462;
-    x_current[2] = 5.500064373016357;
-    x_current[3] = 0.7071703347185013;
-    x_current[4] = -0.0005842926378257056;
-    x_current[5] = 0.0006849537125238465;
-    x_current[6] = 0.7070426487381422;
-    x_current[7] = 0.0023348538307239554;
-    x_current[8] = 0.00004944333821403482;
-    x_current[9] = 0.0000061913151512271725;
-    x_current[10] = -0.000005271160716802115;
+    x_current[0] = 1;
+    x_current[1] = 1;
+    x_current[2] = 5;
+    x_current[3] = 1;
+    x_current[4] = 0;
+    x_current[5] = 0;
+    x_current[6] = 0.5;
+    x_current[7] = 0;
+    x_current[8] = 0;
+    x_current[9] = 0;
+    x_current[10] = 0;
     
   
 

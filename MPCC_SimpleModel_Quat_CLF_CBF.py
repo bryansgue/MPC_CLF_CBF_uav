@@ -626,7 +626,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     x = np.zeros((11, t.shape[0]+1-N_prediction), dtype = np.double)
 
     # Read Real data
-    P_UAV_simple.main(vel_pub, vel_msg )
+    #P_UAV_simple.main(vel_pub, vel_msg )
 
     
 
@@ -636,11 +636,11 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         print(f"Leyendo odometría... Inicio en {i} segundos")
         # Realizar exactamente 5 lecturas en 1 segundo
         for _ in range(3):
-            x[:, 0] = get_odometry_simple_quat()
+            #x[:, 0] = get_odometry_simple_quat()
             time.sleep(0.2)  # Espera 0.2s entre cada lectura (5 lecturas en 1 segundo)
     print("¡Sistema listo!")
     
-    #x[:, 0] = [1,1,5,1,0,0,0.5,0,0,0,0]
+    x[:, 0] = [1,1,5,1,0,0,0.5,0,0,0,0]
    
     # Obtener las funciones de trayectoria y sus derivadas
     xd, yd, zd, xd_p, yd_p, zd_p = trayectoria(t)
@@ -745,19 +745,24 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
 
     # Posiciones de los obstáculos y sus radios
     obs_pos = np.array([
-    [4.8753, 3.6136, 6.7743],  # 1
-    [9.8215, 3.0610, 6.6559],  # 2
-    [9.9405, -1.8058, 5.6130],  # 3
-    [5.0403, -3.9034, 5.1636],  # 4
+    [-1.9236 ,  -3.1921   , 4.5191],  # 1
+    [ 0   ,-4    ,5.0],  # 2
+    [  1.2913   ,-1.3751    ,5.3228],  # 3
+    [ -1.8374  ,  2.2001   , 4.5406],  # 4
      # 5
-    [0.5521, 4.5867, 6.9829],  # 6
-    [-3.8693, 2.6429, 6.5663],  # 7
-    [-3.7215, -3.7539, 5.1956],  # 8
-    [0.8770, -4.0461, 5.1330]   # 9
-    ])
+    [ -0.2198 ,   3.9939   , 4.9451],  # 5
+    [  1.9656   , 2.5539    ,5.4914],  # 6
+    [ -0.9264 ,  -0.9540   , 4.7684],  # 7
+    [1.7576   ,-3.4376  ,  5.4394]])  # 8
 
-    obs_ra = 0.8*np.array([0.35, 0.40, 0.45, 0.5, 0.45, 0.35, 0.30, 0.25])
+    obs_ra = 0.8*np.array([0.15, 0.20, 0.15, 0.25, 0.30, 0.25, 0.20, 0.1])
 
+
+    # Definir dimensiones
+    N_prediction = simX.shape[1] - 1
+
+    # Inicializar un array 3D vacío para almacenar solo los 3 primeros componentes (posiciones)
+    prediction_history = np.zeros((3, N_prediction + 1, 0))  # Shape inicial (3, N_prediction+1, 0)
 
     for k in range(0, t.shape[0]-N_prediction):
         tic = time.time()
@@ -813,6 +818,13 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
             simX[:,i] = acados_ocp_solver.get(i, "x")
             simU[:,i] = acados_ocp_solver.get(i, "u")
         simX[:,N_prediction] = acados_ocp_solver.get(N_prediction, "x")
+
+
+        
+
+        # En cada iteración del bucle de control:
+        prediction_history = np.concatenate((prediction_history, simX[:3, :, np.newaxis]), axis=2)  # Guardamos solo las primeras 3 filas
+
 
         publish_matrix(simX[0:3, 0:N_prediction], '/Prediction')
 
@@ -897,7 +909,8 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
             'e_contorno': e_contorno,
             'e_arrastre': e_arrastre,
             'vel_progres': vel_progres,
-            'vel_progres_ref':vel_progress_ref})
+            'vel_progres_ref':vel_progress_ref,
+            'prediction_matrix': prediction_history})
 
     return None
 

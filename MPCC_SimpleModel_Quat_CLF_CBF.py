@@ -742,7 +742,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     constraint_expr = ocp.model.con_h_expr
 
     # Crear la función de CasADi para evaluar la restricción
-    constraint_func = Function('constraint_func', [ocp.model.x, ocp.model.u, ocp.model.p], [constraint_expr])
+    #constraint_func = Function('constraint_func', [ocp.model.x, ocp.model.u, ocp.model.p], [constraint_expr])
 
 
     # Posiciones de los obstáculos y sus radios
@@ -799,7 +799,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         h_CBF_2[:, k] = np.linalg.norm(x[:3, k] - obst_movil) - (uav_r + obsmovil_r + margen)
         print(h_CBF_1[:, k])
 
-        constraint_value = constraint_func(x[:, k],u_control[:, k],  np.hstack([xref[:,k],dp_ds[:,k], values])   )
+        #constraint_value = constraint_func(x[:, k],u_control[:, k],  np.hstack([xref[:,k],dp_ds[:,k], values])   )
         # CLF[:,k] = (constraint_value[2])
 
 

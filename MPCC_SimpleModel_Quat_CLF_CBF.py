@@ -351,44 +351,46 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon) -> AcadosOcp:
     h_p_movil = Lf_h_movil + Lg_h_movil @ model.u
     h_pp_movil = Lf2_h_movil + Lg_L_f_h_movil @ model.u
 
-        # set constraints
-    ocp.constraints.constr_type = 'BGH'
-
-    # Funciones de barrera de segundo orden
-    nb_1 = h
-    nb_2 = vertcat(h, Lf_h) 
-
-    nb_1_movil = h_movil
-    nb_2_movil = vertcat(h_movil, Lf_h_movil) 
 
 
-    K_alpha = MX([30, 25]).T ## 20 8
-    K_alpha_movil = MX([20, 15]).T ## 20 8
+    # # set constraints
+    # ocp.constraints.constr_type = 'BGH'
 
-    #constraints = vertcat(h_p + 5*nb_1)
-    CBF_static = h_pp +  K_alpha @ nb_2
-    CBF_movil = h_pp_movil +  K_alpha_movil @ nb_2_movil
+    # # Funciones de barrera de segundo orden
+    # nb_1 = h
+    # nb_2 = vertcat(h, Lf_h) 
 
-    constraints = vertcat(CBF_static, CBF_movil, V_p + 0.9*V)
-    #constraints = vertcat(CBF_static, CBF_movil  , V_p + 0.9*V, vel_progres)
-    #constraints = vertcat(model.x[0] )
+    # nb_1_movil = h_movil
+    # nb_2_movil = vertcat(h_movil, Lf_h_movil) 
 
-    # Asigna las restricciones al modelo del OCP
-    N_constraints = constraints.size1()
 
-    ocp.model.con_h_expr = constraints
-    ocp.constraints.lh = np.array([0,   0,  -1e9 ])  # Límite inferior 
-    ocp.constraints.uh = np.array([1e9, 1e9,  0  ])  # Límite superior
+    # K_alpha = MX([30, 25]).T ## 20 8
+    # K_alpha_movil = MX([20, 15]).T ## 20 8
 
-    # Configuración de las restricciones suaves
-    cost_weights =  np.array([0.1,0.1 ,10])
-    ocp.cost.zu = 1*cost_weights 
-    ocp.cost.zl = 1*cost_weights 
-    ocp.cost.Zl = 1 * cost_weights 
-    ocp.cost.Zu = 1 * cost_weights 
+    # #constraints = vertcat(h_p + 5*nb_1)
+    # CBF_static = h_pp +  K_alpha @ nb_2
+    # CBF_movil = h_pp_movil +  K_alpha_movil @ nb_2_movil
 
-    # Índices para las restricciones suaves (necesario si se usan)
-    ocp.constraints.idxsh = np.arange(N_constraints)  # Índices de las restricciones suaves
+    # constraints = vertcat(CBF_static, CBF_movil, V_p + 0.9*V)
+    # #constraints = vertcat(CBF_static, CBF_movil  , V_p + 0.9*V, vel_progres)
+    # #constraints = vertcat(model.x[0] )
+
+    # # Asigna las restricciones al modelo del OCP
+    # N_constraints = constraints.size1()
+
+    # ocp.model.con_h_expr = constraints
+    # ocp.constraints.lh = np.array([0,   0,  -1e9 ])  # Límite inferior 
+    # ocp.constraints.uh = np.array([1e9, 1e9,  0  ])  # Límite superior
+
+    # # Configuración de las restricciones suaves
+    # cost_weights =  np.array([0.1,0.1 ,10])
+    # ocp.cost.zu = 1*cost_weights 
+    # ocp.cost.zl = 1*cost_weights 
+    # ocp.cost.Zl = 1 * cost_weights 
+    # ocp.cost.Zu = 1 * cost_weights 
+
+    # # Índices para las restricciones suaves (necesario si se usan)
+    # ocp.constraints.idxsh = np.arange(N_constraints)  # Índices de las restricciones suaves
 
     
 
@@ -626,7 +628,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     x = np.zeros((11, t.shape[0]+1-N_prediction), dtype = np.double)
 
     # Read Real data
-    #P_UAV_simple.main(vel_pub, vel_msg )
+    P_UAV_simple.main(vel_pub, vel_msg )
 
     
 
@@ -636,11 +638,11 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         print(f"Leyendo odometría... Inicio en {i} segundos")
         # Realizar exactamente 5 lecturas en 1 segundo
         for _ in range(3):
-            #x[:, 0] = get_odometry_simple_quat()
+            x[:, 0] = get_odometry_simple_quat()
             time.sleep(0.2)  # Espera 0.2s entre cada lectura (5 lecturas en 1 segundo)
     print("¡Sistema listo!")
     
-    x[:, 0] = [1,1,5,1,0,0,0.5,0,0,0,0]
+    #x[:, 0] = [1,1,5,1,0,0,0.5,0,0,0,0]
    
     # Obtener las funciones de trayectoria y sus derivadas
     xd, yd, zd, xd_p, yd_p, zd_p = trayectoria(t)
@@ -798,7 +800,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         print(h_CBF_1[:, k])
 
         constraint_value = constraint_func(x[:, k],u_control[:, k],  np.hstack([xref[:,k],dp_ds[:,k], values])   )
-        CLF[:,k] = (constraint_value[2])
+        # CLF[:,k] = (constraint_value[2])
 
 
         # SET REFERENCES       
@@ -843,7 +845,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         send_velocity_control(u_control[:, k], vel_pub, vel_msg)
 
         # System Evolution
-        opcion = "Sim"  # Valor que quieres evaluar
+        opcion = "Real"  # Valor que quieres evaluar
 
         if opcion == "Real":
             x[:, k+1] = get_odometry_simple_quat()

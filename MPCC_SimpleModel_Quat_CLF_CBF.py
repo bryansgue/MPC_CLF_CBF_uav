@@ -52,12 +52,13 @@ wy_real = 0.0
 wz_real = 0.0
 
 # Definir el valor global
-value = 5
+value = 8
 valueB = 7 # Buencomportameinto con 5
 
-uav_r = 0.15
+r_helices = 0.165
+uav_r = 0.325 + r_helices
 margen = 0.1
-obsmovil_r = 0.4
+obsmovil_r = 0.25
 
 
 def f_system_simple_model_quat():
@@ -361,7 +362,7 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon) -> AcadosOcp:
     nb_2_movil = vertcat(h_movil, Lf_h_movil) 
 
 
-    K_alpha = MX([20, 8]).T ## 20 8
+    K_alpha = MX([30, 25]).T ## 20 8
     K_alpha_movil = MX([20, 15]).T ## 20 8
 
     #constraints = vertcat(h_p + 5*nb_1)
@@ -413,45 +414,45 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon) -> AcadosOcp:
 def trayectoria(t):
 
     def xd(t):
-        return 7 * np.sin(value * 0.04 * t) + 3
+        return 4 * np.sin(value * 0.04 * t) 
 
     def yd(t):
-        return 7 * np.sin(value * 0.08 * t)
+        return 2 * np.sin(value * 0.08 * t)
 
     def zd(t):
-        return 1.5 * np.sin(value * 0.08 * t) + 6
+        return 0.5 * np.sin(value * 0.08 * t) + 5
 
     def xd_p(t):
-        return 7 * value * 0.04 * np.cos(value * 0.04 * t)
+        return 4 * value * 0.04 * np.cos(value * 0.04 * t)
 
     def yd_p(t):
-        return 7 * value * 0.08 * np.cos(value * 0.08 * t)
+        return 2 * value * 0.08 * np.cos(value * 0.08 * t)
 
     def zd_p(t):
-        return 1.5 * value * 0.08 * np.cos(value * 0.08 * t)
+        return 0.5 * value * 0.08 * np.cos(value * 0.08 * t)
 
-    return xd, yd, zd, xd_p, yd_p, zd_p
+    return yd, xd, zd, yd_p, xd_p, zd_p
 
 def trayectoriaB(t):
     def xd(t):
-        return 7 * np.sin(-valueB * 0.04 * t) + 3
+        return 4 * np.sin(-valueB * 0.04 * t) 
 
     def yd(t):
-        return 7 * np.sin(-valueB * 0.08 * t)
+        return 2 * np.sin(-valueB * 0.08 * t)
 
     def zd(t):
-        return 1.5 * np.sin(-valueB * 0.08 * t) + 6
+        return 0.5 * np.sin(-valueB * 0.08 * t) + 5
 
     def xd_p(t):
-        return -7 * valueB * 0.04 * np.cos(-valueB * 0.04 * t)
+        return -4 * valueB * 0.04 * np.cos(-valueB * 0.04 * t)
 
     def yd_p(t):
-        return -7 * valueB * 0.08 * np.cos(-valueB * 0.08 * t)
+        return -2 * valueB * 0.08 * np.cos(-valueB * 0.08 * t)
 
     def zd_p(t):
-        return -1.5 * valueB * 0.08 * np.cos(-valueB * 0.08 * t)
+        return -0.5 * valueB * 0.08 * np.cos(-valueB * 0.08 * t)
 
-    return xd, yd, zd, xd_p, yd_p, zd_p
+    return yd, xd, zd, yd_p, xd_p, zd_p
 
 def calculate_errors_norm(sd, sd_p, model_x):
     """
@@ -830,7 +831,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         send_velocity_control(u_control[:, k], vel_pub, vel_msg)
 
         # System Evolution
-        opcion = "Real"  # Valor que quieres evaluar
+        opcion = "Sim"  # Valor que quieres evaluar
 
         if opcion == "Real":
             x[:, k+1] = get_odometry_simple_quat()

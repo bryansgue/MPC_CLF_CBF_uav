@@ -879,7 +879,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
 
             #For MODEL TESTS
     # Ruta que deseas verificar
-    pwd = "/home/bryansgue/Doctoral_Research/Matlab/Results_MPCC_CLF_CBF_uav_v2"
+    pwd = "/home/bryansgue/Doctoral_Research/Matlab/Results_MPCC_CLF_CBF_uav_v"
 
     # Verificar si la ruta no existe
     if not os.path.exists(pwd) or not os.path.isdir(pwd):

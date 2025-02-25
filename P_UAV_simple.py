@@ -70,8 +70,8 @@ def main(vel_pub, vel_msg ):
     # Reference Signal of the system
     xref = np.zeros((12, t.shape[0]), dtype = np.double)
     xref[0,:] = 0
-    xref[1,:] = 0
-    xref[2,:] = 5.5
+    xref[1,:] = 2
+    xref[2,:] = 4.5
     xref[3,:] = 90* (math.pi / 180)
     xref[4,:] = 0
     xref[5,:] = 0

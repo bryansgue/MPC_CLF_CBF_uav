@@ -52,13 +52,13 @@ wy_real = 0.0
 wz_real = 0.0
 
 # Definir el valor global
-value = 8
-valueB = 7 # Buencomportameinto con 5
+value = 5
+valueB =7 # Buencomportameinto con 5
 
-r_helices = 0.165
+r_helices = 0.165*0
 uav_r = 0.325 + r_helices
 margen = 0.1
-obsmovil_r = 0.25
+obsmovil_r = 0.20
 
 
 def f_system_simple_model_quat():
@@ -243,7 +243,6 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon) -> AcadosOcp:
     ocp.cost.cost_type = "EXTERNAL"
     ocp.cost.cost_type_e = "EXTERNAL"
 
-    
 
     p = vertcat(model.x[0], model.x[1], model.x[2])  # Posiciones p1, p2, p3
     q = vertcat(model.x[3], model.x[4], model.x[5], model.x[6])  # Posiciones p1, p2, p3
@@ -277,9 +276,9 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon) -> AcadosOcp:
     #Ganancias
     # set cost
     Q_q = 1* np.diag([1, 1, 1])  # [x,th,dx,dth]
-    Q_el = 3 * np.eye(3)  
-    Q_ec = 3 * np.eye(3) 
-    U_mat = 2 * np.diag([ 1,1,2,1])
+    Q_el = 2 * np.eye(3)  
+    Q_ec = 2 * np.eye(3)
+    U_mat = 2.5* np.diag([ 1,1,2,1])
     Q_vels = 0.0001
 
 
@@ -351,48 +350,45 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon) -> AcadosOcp:
     h_p_movil = Lf_h_movil + Lg_h_movil @ model.u
     h_pp_movil = Lf2_h_movil + Lg_L_f_h_movil @ model.u
 
-
-
     # # set constraints
-    # ocp.constraints.constr_type = 'BGH'
+    ocp.constraints.constr_type = 'BGH'
 
-    # # Funciones de barrera de segundo orden
-    # nb_1 = h
-    # nb_2 = vertcat(h, Lf_h) 
+    # Funciones de barrera de segundo orden
+    nb_1 = h
+    nb_2 = vertcat(h, Lf_h) 
 
-    # nb_1_movil = h_movil
-    # nb_2_movil = vertcat(h_movil, Lf_h_movil) 
+    nb_1_movil = h_movil
+    nb_2_movil = vertcat(h_movil, Lf_h_movil) 
 
 
-    # K_alpha = MX([30, 25]).T ## 20 8
-    # K_alpha_movil = MX([20, 15]).T ## 20 8
+    K_alpha = MX([25, 15]).T ## 20 8
+    K_alpha_movil = MX([25, 15]).T ## 20 8
 
-    # #constraints = vertcat(h_p + 5*nb_1)
-    # CBF_static = h_pp +  K_alpha @ nb_2
-    # CBF_movil = h_pp_movil +  K_alpha_movil @ nb_2_movil
+    #constraints = vertcat(h_p + 5*nb_1)
+    CBF_static = h_pp +  K_alpha @ nb_2
+    CBF_movil = h_pp_movil +  K_alpha_movil @ nb_2_movil
 
-    # constraints = vertcat(CBF_static, CBF_movil, V_p + 0.9*V)
-    # #constraints = vertcat(CBF_static, CBF_movil  , V_p + 0.9*V, vel_progres)
-    # #constraints = vertcat(model.x[0] )
+    constraints = vertcat(CBF_static, CBF_movil, V_p + 0.9*V)
+    #constraints = vertcat(CBF_static, CBF_movil  , V_p + 0.9*V, vel_progres)
+    #constraints = vertcat(model.x[0] )
 
-    # # Asigna las restricciones al modelo del OCP
-    # N_constraints = constraints.size1()
+    # Asigna las restricciones al modelo del OCP
+    N_constraints = constraints.size1()
 
-    # ocp.model.con_h_expr = constraints
-    # ocp.constraints.lh = np.array([0,   0,  -1e9 ])  # Límite inferior 
-    # ocp.constraints.uh = np.array([1e9, 1e9,  0  ])  # Límite superior
+    ocp.model.con_h_expr = constraints
+    ocp.constraints.lh = np.array([0,   0 ,  -1e9 ])  # Límite inferior 
+    ocp.constraints.uh = np.array([1e9, 1e9 ,  0  ])  # Límite superior
 
-    # # Configuración de las restricciones suaves
-    # cost_weights =  np.array([0.1,0.1 ,10])
-    # ocp.cost.zu = 1*cost_weights 
-    # ocp.cost.zl = 1*cost_weights 
-    # ocp.cost.Zl = 1 * cost_weights 
-    # ocp.cost.Zu = 1 * cost_weights 
+    # Configuración de las restricciones suaves
+    cost_weights =  np.array([0.1,0.1,  10])
+    ocp.cost.zu = 1*cost_weights 
+    ocp.cost.zl = 1*cost_weights 
+    ocp.cost.Zl = 1 * cost_weights 
+    ocp.cost.Zu = 1 * cost_weights 
 
-    # # Índices para las restricciones suaves (necesario si se usan)
-    # ocp.constraints.idxsh = np.arange(N_constraints)  # Índices de las restricciones suaves
+    # Índices para las restricciones suaves (necesario si se usan)
+    ocp.constraints.idxsh = np.arange(N_constraints)  # Índices de las restricciones suaves
 
-    
 
     ocp.constraints.x0 = x0
 
@@ -416,19 +412,19 @@ def create_ocp_solver_description(x0, N_horizon, t_horizon) -> AcadosOcp:
 def trayectoria(t):
 
     def xd(t):
-        return 4 * np.sin(value * 0.04 * t) 
+        return 6 * np.sin(value * 0.04 * t)
 
     def yd(t):
-        return 2 * np.sin(value * 0.08 * t)
+        return 4 * np.sin(value * 0.08 * t)
 
     def zd(t):
         return 0.5 * np.sin(value * 0.08 * t) + 5
 
     def xd_p(t):
-        return 4 * value * 0.04 * np.cos(value * 0.04 * t)
+        return 6 * value * 0.04 * np.cos(value * 0.04 * t)
 
     def yd_p(t):
-        return 2 * value * 0.08 * np.cos(value * 0.08 * t)
+        return 4 * value * 0.08 * np.cos(value * 0.08 * t)
 
     def zd_p(t):
         return 0.5 * value * 0.08 * np.cos(value * 0.08 * t)
@@ -437,24 +433,25 @@ def trayectoria(t):
 
 def trayectoriaB(t):
     def xd(t):
-        return 4 * np.sin(-valueB * 0.04 * t) 
+        return 6 * np.sin(-valueB * 0.04 * t)
 
     def yd(t):
-        return 2 * np.sin(-valueB * 0.08 * t)
+        return 4 * np.sin(-valueB * 0.08 * t)
 
     def zd(t):
         return 0.5 * np.sin(-valueB * 0.08 * t) + 5
 
     def xd_p(t):
-        return -4 * valueB * 0.04 * np.cos(-valueB * 0.04 * t)
+        return -6 * valueB * 0.04 * np.cos(-valueB * 0.04 * t)
 
     def yd_p(t):
-        return -2 * valueB * 0.08 * np.cos(-valueB * 0.08 * t)
+        return -4 * valueB * 0.08 * np.cos(-valueB * 0.08 * t)
 
     def zd_p(t):
         return -0.5 * valueB * 0.08 * np.cos(-valueB * 0.08 * t)
 
     return yd, xd, zd, yd_p, xd_p, zd_p
+
 
 def calculate_errors_norm(sd, sd_p, model_x):
     """
@@ -551,7 +548,7 @@ def calculate_positions_and_arc_length(xd, yd, zd, xd_p, yd_p, zd_p, t_range, t_
 
     return arc_lengths, positions, position_by_arc_length
 
-def manage_ocp_solver(model, ocp):
+def manage_ocp_solver(model, ocp, selector):
     """
     Maneja la creación o uso del solver OCP.
 
@@ -568,7 +565,7 @@ def manage_ocp_solver(model, ocp):
     # Comprobar si el archivo JSON del solver ya existe
     if os.path.exists(solver_json):
         # Preguntar al usuario qué desea hacer
-        respuesta = input(f"El solver {solver_json} ya existe. ¿Usar anterior (a) o generar nuevo (n)? [a/n]: ").strip().upper()
+        respuesta = selector
         
         if respuesta == 'A':
             print(f"Usando el solver existente: {solver_json}")
@@ -592,7 +589,7 @@ def manage_ocp_solver(model, ocp):
 def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     # Initial Values System
     # Simulation Time
-    t_final = 30
+    t_final = 60
     # Sample time
     frec= 30
     t_s = 1/frec
@@ -628,12 +625,12 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     x = np.zeros((11, t.shape[0]+1-N_prediction), dtype = np.double)
 
     # Read Real data
+    # Cuenta regresiva de 5 segundos
+    print("Inicializando sistema...")
+    selector = input(f"¿Usar anterior (a) o generar nuevo (n)? [a/n]: ").strip().upper()
     P_UAV_simple.main(vel_pub, vel_msg )
 
     
-
-    # Cuenta regresiva de 5 segundos
-    print("Inicializando sistema...")
     for i in range(3, 0, -1):
         print(f"Leyendo odometría... Inicio en {i} segundos")
         # Realizar exactamente 5 lecturas en 1 segundo
@@ -675,6 +672,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     for i in range(t.shape[0]):
         quaternion = euler_to_quaternion(0, 0, psid[i])  # Calcula el cuaternión para el ángulo de cabeceo en el instante i
         quatd[:, i] = quaternion  # Almacena el cuaternión en la columna i de 'quatd'
+        #quatd[:, i] = [1, 0, 0 ,0]
 
 
     
@@ -719,7 +717,7 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     ocp = create_ocp_solver_description(x[:,0], N_prediction, t_prediction)
     #acados_ocp_solver = AcadosOcpSolver(ocp, json_file="acados_ocp_" + ocp.model.name + ".json", build= True, generate= True)
 
-    acados_ocp_solver = manage_ocp_solver(model, ocp)
+    acados_ocp_solver = manage_ocp_solver(model, ocp, selector)
 
     nx = ocp.model.x.size()[0]
     nu = ocp.model.u.size()[0]
@@ -742,22 +740,19 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
     constraint_expr = ocp.model.con_h_expr
 
     # Crear la función de CasADi para evaluar la restricción
-    #constraint_func = Function('constraint_func', [ocp.model.x, ocp.model.u, ocp.model.p], [constraint_expr])
+    constraint_func = Function('constraint_func', [ocp.model.x, ocp.model.u, ocp.model.p], [constraint_expr])
 
 
-    # Posiciones de los obstáculos y sus radios
-    obs_pos = np.array([
-    [-1.9236 ,  -3.1921   , 4.5191],  # 1
-    [ 0   ,-4    ,5.0],  # 2
-    [  1.2913   ,-1.3751    ,5.3228],  # 3
-    [ -1.8374  ,  2.2001   , 4.5406],  # 4
-     # 5
-    [ -0.2198 ,   3.9939   , 4.9451],  # 5
-    [  1.9656   , 2.5539    ,5.4914],  # 6
-    [ -0.9264 ,  -0.9540   , 4.7684],  # 7
-    [1.7576   ,-3.4376  ,  5.4394]])  # 8
+
+    
+
+    instantes = np.array([100, 200, 300, 400, 500, 600, 700])  # Ejemplo con valores manuales
+
+    obs_pos = movil_obs1[:, instantes].T
+
 
     obs_ra = 0.8*np.array([0.15, 0.20, 0.15, 0.25, 0.30, 0.25, 0.20, 0.1])
+
 
 
     # Definir dimensiones
@@ -799,8 +794,8 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
         h_CBF_2[:, k] = np.linalg.norm(x[:3, k] - obst_movil) - (uav_r + obsmovil_r + margen)
         print(h_CBF_1[:, k])
 
-        #constraint_value = constraint_func(x[:, k],u_control[:, k],  np.hstack([xref[:,k],dp_ds[:,k], values])   )
-        # CLF[:,k] = (constraint_value[2])
+        constraint_value = constraint_func(x[:, k],u_control[:, k],  np.hstack([xref[:,k],dp_ds[:,k], values])   )
+        CLF[:,k] = (constraint_value[2])
 
 
         # SET REFERENCES       
@@ -912,7 +907,8 @@ def main(vel_pub, vel_msg, odom_sim_pub_1, odom_sim_msg_1):
             'e_arrastre': e_arrastre,
             'vel_progres': vel_progres,
             'vel_progres_ref':vel_progress_ref,
-            'prediction_matrix': prediction_history})
+            'prediction_matrix': prediction_history,
+            'posciones':obs_pos})
 
     return None
 

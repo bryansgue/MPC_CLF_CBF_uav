@@ -27,7 +27,6 @@ extern "C" {
 #define casadi_c0 CASADI_PREFIX(c0)
 #define casadi_c1 CASADI_PREFIX(c1)
 #define casadi_c2 CASADI_PREFIX(c2)
-#define casadi_c3 CASADI_PREFIX(c3)
 #define casadi_clear CASADI_PREFIX(clear)
 #define casadi_copy CASADI_PREFIX(copy)
 #define casadi_densify CASADI_PREFIX(densify)
@@ -365,8 +364,7 @@ static const casadi_int casadi_s17[7] = {3, 1, 0, 3, 0, 1, 2};
 
 static const casadi_real casadi_c0[9] = {1., 0., 0., 0., 1., 0., 0., 0., 1.};
 static const casadi_real casadi_c1[16] = {1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.};
-static const casadi_real casadi_c2[2] = {30., 25.};
-static const casadi_real casadi_c3[2] = {20., 15.};
+static const casadi_real casadi_c2[2] = {25., 15.};
 
 /* Drone_ode_constr_h_fun:(i0[11],i1[4],i2[],i3[25])->(o0[3]) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem) {
@@ -1618,13 +1616,13 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   w0 += w62;
   /* #574: @62 = 0 */
   w62 = 0.;
-  /* #575: @83 = [30, 25] */
+  /* #575: @83 = [25, 15] */
   casadi_copy(casadi_c2, 2, w83);
   /* #576: @83 = @83' */
   /* #577: @54 = 0.1 */
   w54 = 1.0000000000000001e-01;
-  /* #578: @55 = 0.49 */
-  w55 = 4.8999999999999999e-01;
+  /* #578: @55 = 0.325 */
+  w55 = 3.2500000000000001e-01;
   /* #579: @72 = input[3][21] */
   w72 = arg[3] ? arg[3][21] : 0;
   /* #580: @55 = (@55+@72) */
@@ -2413,11 +2411,11 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   w0 += w63;
   /* #958: @63 = 0 */
   w63 = 0.;
-  /* #959: @83 = [20, 15] */
-  casadi_copy(casadi_c3, 2, w83);
+  /* #959: @83 = [25, 15] */
+  casadi_copy(casadi_c2, 2, w83);
   /* #960: @83 = @83' */
-  /* #961: @48 = 0.84 */
-  w48 = 8.3999999999999997e-01;
+  /* #961: @48 = 0.625 */
+  w48 = 6.2500000000000000e-01;
   /* #962: @55 = (@55-@48) */
   w55 -= w48;
   /* #963: @48 = 0 */

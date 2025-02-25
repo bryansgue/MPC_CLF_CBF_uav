@@ -27,7 +27,6 @@ extern "C" {
 #define casadi_c0 CASADI_PREFIX(c0)
 #define casadi_c1 CASADI_PREFIX(c1)
 #define casadi_c2 CASADI_PREFIX(c2)
-#define casadi_c3 CASADI_PREFIX(c3)
 #define casadi_clear CASADI_PREFIX(clear)
 #define casadi_copy CASADI_PREFIX(copy)
 #define casadi_densify CASADI_PREFIX(densify)
@@ -428,8 +427,7 @@ static const casadi_int casadi_s29[3] = {3, 0, 0};
 
 static const casadi_real casadi_c0[9] = {1., 0., 0., 0., 1., 0., 0., 0., 1.};
 static const casadi_real casadi_c1[16] = {1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.};
-static const casadi_real casadi_c2[2] = {30., 25.};
-static const casadi_real casadi_c3[2] = {20., 15.};
+static const casadi_real casadi_c2[2] = {25., 15.};
 
 /* Drone_ode_constr_h_fun_jac_uxt_zt:(i0[11],i1[4],i2[],i3[25])->(o0[3],o1[15x3,40nz],o2[3x0]) */
 static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw, casadi_real* w, int mem) {
@@ -1682,14 +1680,14 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   w0 += w62;
   /* #574: @62 = 0 */
   w62 = 0.;
-  /* #575: @119 = [30, 25] */
+  /* #575: @119 = [25, 15] */
   casadi_copy(casadi_c2, 2, w119);
   /* #576: @120 = @119' */
   casadi_copy(w119, 2, w120);
   /* #577: @77 = 0.1 */
   w77 = 1.0000000000000001e-01;
-  /* #578: @55 = 0.49 */
-  w55 = 4.8999999999999999e-01;
+  /* #578: @55 = 0.325 */
+  w55 = 3.2500000000000001e-01;
   /* #579: @81 = input[3][21] */
   w81 = arg[3] ? arg[3][21] : 0;
   /* #580: @55 = (@55+@81) */
@@ -2481,12 +2479,12 @@ static int casadi_f0(const casadi_real** arg, casadi_real** res, casadi_int* iw,
   w0 += w133;
   /* #958: @133 = 0 */
   w133 = 0.;
-  /* #959: @120 = [20, 15] */
-  casadi_copy(casadi_c3, 2, w120);
+  /* #959: @120 = [25, 15] */
+  casadi_copy(casadi_c2, 2, w120);
   /* #960: @122 = @120' */
   casadi_copy(w120, 2, w122);
-  /* #961: @143 = 0.84 */
-  w143 = 8.3999999999999997e-01;
+  /* #961: @143 = 0.625 */
+  w143 = 6.2500000000000000e-01;
   /* #962: @143 = (@56-@143) */
   w143  = (w56-w143);
   /* #963: @126 = 0 */

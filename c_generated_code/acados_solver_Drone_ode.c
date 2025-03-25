@@ -41,7 +41,6 @@
 #include "Drone_ode_model/Drone_ode_model.h"
 
 
-#include "Drone_ode_constraints/Drone_ode_constraints.h"
 #include "Drone_ode_cost/Drone_ode_cost.h"
 
 
@@ -333,16 +332,6 @@ void Drone_ode_acados_create_setup_functions(Drone_ode_solver_capsule* capsule)
 
 
     ext_fun_opts.external_workspace = true;
-    // constraints.constr_type == "BGH" and dims.nh > 0
-    capsule->nl_constr_h_fun_jac = (external_function_external_param_casadi *) malloc(sizeof(external_function_external_param_casadi)*(N-1));
-    for (int i = 0; i < N-1; i++) {
-        MAP_CASADI_FNC(nl_constr_h_fun_jac[i], Drone_ode_constr_h_fun_jac_uxt_zt);
-    }
-    capsule->nl_constr_h_fun = (external_function_external_param_casadi *) malloc(sizeof(external_function_external_param_casadi)*(N-1));
-    for (int i = 0; i < N-1; i++) {
-        MAP_CASADI_FNC(nl_constr_h_fun[i], Drone_ode_constr_h_fun);
-    }
-
     // external cost
     MAP_CASADI_FNC(ext_cost_0_fun, Drone_ode_cost_ext_cost_0_fun);
     MAP_CASADI_FNC(ext_cost_0_fun_jac, Drone_ode_cost_ext_cost_0_fun_jac);
@@ -534,34 +523,6 @@ void Drone_ode_acados_setup_nlp_in(Drone_ode_solver_capsule* capsule, const int 
 
 
 
-    // slacks
-    double* zlumem = calloc(4*NS, sizeof(double));
-    double* Zl = zlumem+NS*0;
-    double* Zu = zlumem+NS*1;
-    double* zl = zlumem+NS*2;
-    double* zu = zlumem+NS*3;
-    // change only the non-zero elements:
-    Zl[0] = 0.1;
-    Zl[1] = 0.1;
-    Zl[2] = 10;
-    Zu[0] = 0.1;
-    Zu[1] = 0.1;
-    Zu[2] = 10;
-    zl[0] = 0.1;
-    zl[1] = 0.1;
-    zl[2] = 10;
-    zu[0] = 0.1;
-    zu[1] = 0.1;
-    zu[2] = 10;
-
-    for (int i = 1; i < N; i++)
-    {
-        ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "Zl", Zl);
-        ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "Zu", Zu);
-        ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "zl", zl);
-        ocp_nlp_cost_model_set(nlp_config, nlp_dims, nlp_in, i, "zu", zu);
-    }
-    free(zlumem);
 
 
 
@@ -586,28 +547,28 @@ void Drone_ode_acados_setup_nlp_in(Drone_ode_solver_capsule* capsule, const int 
     double* lbx0 = lubx0;
     double* ubx0 = lubx0 + NBX0;
     // change only the non-zero elements:
-    lbx0[0] = -0.024793238152260946;
-    ubx0[0] = -0.024793238152260946;
-    lbx0[1] = 1.9604381327269635;
-    ubx0[1] = 1.9604381327269635;
-    lbx0[2] = 4.500072479248047;
-    ubx0[2] = 4.500072479248047;
-    lbx0[3] = 0.707106666153056;
-    ubx0[3] = 0.707106666153056;
-    lbx0[4] = -0.00010163745426029964;
-    ubx0[4] = -0.00010163745426029964;
-    lbx0[5] = 0.0004427254226811315;
-    ubx0[5] = 0.0004427254226811315;
-    lbx0[6] = 0.7071067503184642;
-    ubx0[6] = 0.7071067503184642;
-    lbx0[7] = -0.007183252857643205;
-    ubx0[7] = -0.007183252857643205;
-    lbx0[8] = 0.004506428586473622;
-    ubx0[8] = 0.004506428586473622;
-    lbx0[9] = 0.000008929944669944234;
-    ubx0[9] = 0.000008929944669944234;
-    lbx0[10] = 0.00000036419334037418594;
-    ubx0[10] = 0.00000036419334037418594;
+    lbx0[0] = -0.02355746051293284;
+    ubx0[0] = -0.02355746051293284;
+    lbx0[1] = 1.958019972221822;
+    ubx0[1] = 1.958019972221822;
+    lbx0[2] = 4.500065326690674;
+    ubx0[2] = 4.500065326690674;
+    lbx0[3] = 0.7071067817835803;
+    ubx0[3] = 0.7071067817835803;
+    lbx0[4] = -0.00011612835550148244;
+    ubx0[4] = -0.00011612835550148244;
+    lbx0[5] = 0.0004135091031184048;
+    ubx0[5] = 0.0004135091031184048;
+    lbx0[6] = 0.7071066501455737;
+    ubx0[6] = 0.7071066501455737;
+    lbx0[7] = -0.00826392149785198;
+    ubx0[7] = -0.00826392149785198;
+    lbx0[8] = 0.004630457838707071;
+    ubx0[8] = 0.004630457838707071;
+    lbx0[9] = 0.000008460677236143965;
+    ubx0[9] = 0.000008460677236143965;
+    lbx0[10] = 0.0000001864924144001634;
+    ubx0[10] = 0.0000001864924144001634;
 
     ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, 0, "idxbx", idxbx0);
     ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, 0, "lbx", lbx0);
@@ -638,44 +599,6 @@ void Drone_ode_acados_setup_nlp_in(Drone_ode_solver_capsule* capsule, const int 
 
 
     /* constraints that are the same for initial and intermediate */
-    // u
-    int* idxbu = malloc(NBU * sizeof(int));
-    idxbu[0] = 2;
-    double* lubu = calloc(2*NBU, sizeof(double));
-    double* lbu = lubu;
-    double* ubu = lubu + NBU;
-    lbu[0] = -2;
-    ubu[0] = 2;
-
-    for (int i = 0; i < N; i++)
-    {
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "idxbu", idxbu);
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "lbu", lbu);
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "ubu", ubu);
-    }
-    free(idxbu);
-    free(lubu);
-
-
-
-
-    // set up soft bounds for nonlinear constraints
-    int* idxsh = malloc(NSH * sizeof(int));
-    idxsh[0] = 0;
-    idxsh[1] = 1;
-    idxsh[2] = 2;
-    double* lush = calloc(2*NSH, sizeof(double));
-    double* lsh = lush;
-    double* ush = lush + NSH;
-
-    for (int i = 1; i < N; i++)
-    {
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "idxsh", idxsh);
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "lsh", lsh);
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "ush", ush);
-    }
-    free(idxsh);
-    free(lush);
 
 
 
@@ -684,27 +607,10 @@ void Drone_ode_acados_setup_nlp_in(Drone_ode_solver_capsule* capsule, const int 
 
 
 
-    // set up nonlinear constraints for stage 1 to N-1
-    double* luh = calloc(2*NH, sizeof(double));
-    double* lh = luh;
-    double* uh = luh + NH;
-    lh[2] = -1000000000;
-    uh[0] = 1000000000;
-    uh[1] = 1000000000;
 
-    for (int i = 1; i < N; i++)
-    {
-        ocp_nlp_constraints_model_set_external_param_fun(nlp_config, nlp_dims, nlp_in, i, "nl_constr_h_fun_jac",
-                                      &capsule->nl_constr_h_fun_jac[i-1]);
-        ocp_nlp_constraints_model_set_external_param_fun(nlp_config, nlp_dims, nlp_in, i, "nl_constr_h_fun",
-                                      &capsule->nl_constr_h_fun[i-1]);
-        
-        
-        
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "lh", lh);
-        ocp_nlp_constraints_model_set(nlp_config, nlp_dims, nlp_in, i, "uh", uh);
-    }
-    free(luh);
+
+
+
 
 
 
@@ -845,17 +751,17 @@ void Drone_ode_acados_set_nlp_out(Drone_ode_solver_capsule* capsule)
     double* x0 = xu0;
 
     // initialize with x0
-    x0[0] = -0.024793238152260946;
-    x0[1] = 1.9604381327269635;
-    x0[2] = 4.500072479248047;
-    x0[3] = 0.707106666153056;
-    x0[4] = -0.00010163745426029964;
-    x0[5] = 0.0004427254226811315;
-    x0[6] = 0.7071067503184642;
-    x0[7] = -0.007183252857643205;
-    x0[8] = 0.004506428586473622;
-    x0[9] = 0.000008929944669944234;
-    x0[10] = 0.00000036419334037418594;
+    x0[0] = -0.02355746051293284;
+    x0[1] = 1.958019972221822;
+    x0[2] = 4.500065326690674;
+    x0[3] = 0.7071067817835803;
+    x0[4] = -0.00011612835550148244;
+    x0[5] = 0.0004135091031184048;
+    x0[6] = 0.7071066501455737;
+    x0[7] = -0.00826392149785198;
+    x0[8] = 0.004630457838707071;
+    x0[9] = 0.000008460677236143965;
+    x0[10] = 0.0000001864924144001634;
 
 
     double* u0 = xu0 + NX;
@@ -1159,13 +1065,6 @@ int Drone_ode_acados_free(Drone_ode_solver_capsule* capsule)
     
 
     // constraints
-    for (int i = 0; i < N-1; i++)
-    {
-        external_function_external_param_casadi_free(&capsule->nl_constr_h_fun_jac[i]);
-        external_function_external_param_casadi_free(&capsule->nl_constr_h_fun[i]);
-    }
-    free(capsule->nl_constr_h_fun_jac);
-    free(capsule->nl_constr_h_fun);
 
 
 

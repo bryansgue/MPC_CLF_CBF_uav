@@ -4,6 +4,9 @@ This repository implements a **Nonlinear Model Predictive Contour Controller (MP
 
 The code is based on **CasADi 3.5.5** and **ACADOS (latest version)**, and has been **validated experimentally on a DJI Matrice 100** platform.
 
+🔬 The full paper can be found at: [https://ieeeaccess.ieee.org/](Paper Final version)
+
+
 ---
 
 ## 🧠 Project Summary
@@ -160,14 +163,18 @@ Creates plots for:
 
 Developed by:
 
-- Bryan S. Guevara
-- José Varela-Aldás
-- Viviana Moya
-- Manuel Cardona
-- Daniel C. Gandolfo
+- Bryan S. Guevara  
+- José Varela-Aldás  
+- Viviana Moya  
+- Manuel Cardona  
+- Daniel C. Gandolfo  
 - Juan M. Toibero
 
-Affiliations: Universidad Indoamérica, Universidad Internacional del Ecuador (UIDE), INAUT - UNSJ, CONICET.
+Affiliations:  
+1. Instituto de Automática, Universidad Nacional de San Juan – CONICET, San Juan, Argentina  
+2. Facultad de Ciencias Técnicas, Universidad Internacional del Ecuador, Quito, Ecuador  
+3. Facultad de Ingeniería y Ciencias Aplicadas, Universidad de las Américas, Quito, Ecuador  
+4. Research Department, Universidad Don Bosco, Soyapango 1774, El Salvador
 
 ---
 

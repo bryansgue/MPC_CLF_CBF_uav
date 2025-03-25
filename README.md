@@ -1,8 +1,3 @@
-Sure! Here's a complete `README.md` **in English** that you can copy and paste directly into your repo. At the end, I’ve added a clear and detailed breakdown of the most important sections of your code and how they work.
-
----
-
-```markdown
 # MPCC-CLF-CBF for UAV Path-Following 🚁
 
 This repository implements a **Nonlinear Model Predictive Contour Controller (MPCC)** combined with **Control Lyapunov Functions (CLF)** and **High-Order Control Barrier Functions (HOCBF)** for stable and safe trajectory tracking in UAVs.
@@ -25,13 +20,15 @@ The controller operates on a **quaternion-based UAV model** to avoid issues with
 
 ## 📦 Dependencies
 
+```bash
+
 - Python 3.8+
 - [`casadi==3.5.5`](https://web.casadi.org/)
 - [`acados`](https://github.com/acados/acados)
 - `numpy`, `matplotlib`, `scipy`
 - ROS (for real-time execution and simulation)
 - ROS messages: `geometry_msgs`, `nav_msgs`
-
+```
 ---
 
 ## 📁 Repository Structure
@@ -46,6 +43,7 @@ The controller operates on a **quaternion-based UAV model** to avoid issues with
 ├── c_generated_code/
 ├── acados_ocp_*.json
 ├── 1_pose.png, 2_error_pose.png, 3_Time.png
+
 ```
 
 **Key files:**

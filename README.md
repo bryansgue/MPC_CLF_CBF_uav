@@ -4,7 +4,7 @@ This repository implements a **Nonlinear Model Predictive Contour Controller (MP
 
 The code is based on **CasADi 3.5.5** and **ACADOS (latest version)**, and has been **validated experimentally on a DJI Matrice 100** platform.
 
-🔬 The full paper can be found at: [https://ieeeaccess.ieee.org/](Paper Final version)
+🔬 The full paper can be found at: [https://ieeeaccess.ieee.org/] (Paper Final version)
 
 
 ---
